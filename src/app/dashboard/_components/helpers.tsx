@@ -1,3 +1,5 @@
+// ── Helpers ────────────────────────────────────────────────────────────────
+
 export function fmt(n: number, decimals = 2) {
   return n.toLocaleString("es-MX", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 }
@@ -20,14 +22,24 @@ export function pctBg(v: number) {
   return "bg-slate-400/10 text-slate-400";
 }
 
-export function now() {
-  return new Date().toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
-}
 
 export function PctBadge({ value }: { value: number }) {
   return (
     <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs font-mono font-semibold ${pctBg(value)}`}>
       {value > 0 ? "▲" : value < 0 ? "▼" : "●"} {Math.abs(value).toFixed(2)}%
     </span>
+  );
+}
+
+export function now() {
+  return new Date().toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+}
+
+export function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="w-1 h-3 rounded-full bg-primary inline-block shrink-0" />
+      <span className="text-[10px] font-mono font-semibold text-muted-foreground uppercase tracking-widest">{children}</span>
+    </div>
   );
 }

@@ -1,72 +1,100 @@
-import type { TopEntry, IndexEntry, TasaEntry, DivisaEntry, CommodityEntry } from "./types";
+// ── Mock Data (valores reales de la API, 2026-07-03) ─────────────────────
+import type { TopResponse, IndicesResponse, TasasResponse, DivisasResponse, CommoditiesResponse } from "./types";
 
-export const MOCK_GAINERS: TopEntry[] = [
-  { ticker: "FEMSA UBD", name: "Fomento Económico Mexicano", price: 178.42, change: 8.93, changePct: 5.27, volume: 4820000 },
-  { ticker: "GFINBUR O", name: "Grupo Financiero Inbursa", price: 42.18, change: 1.96, changePct: 4.87, volume: 3120000 },
-  { ticker: "BIMBOA", name: "Grupo Bimbo", price: 89.35, change: 3.75, changePct: 4.38, volume: 6540000 },
-  { ticker: "LIVEPOLC-1", name: "El Puerto de Liverpool", price: 137.60, change: 5.10, changePct: 3.85, volume: 2890000 },
-  { ticker: "WALMEX V", name: "Walmart de México", price: 67.24, change: 2.31, changePct: 3.56, volume: 9870000 },
-  { ticker: "ALPEKA", name: "Alpek", price: 22.84, change: 0.74, changePct: 3.34, volume: 5430000 },
-  { ticker: "OMAB", name: "OMA", price: 188.90, change: 5.88, changePct: 3.21, volume: 1240000 },
-  { ticker: "ASURB", name: "Grupo Aeroportuario del Sureste", price: 412.50, change: 12.40, changePct: 3.10, volume: 980000 },
-];
+export const MOCK_TOP: TopResponse = {
+  SUBEN: [
+    { e: "AGUILASCPO",   u: 81.90,   c: 2.23,  f: "2026-07-03" },
+    { e: "LAMOSA*",      u: 97.49,   c: 2.09,  f: "2026-07-03" },
+    { e: "AGUA*",        u: 13.30,   c: 1.76,  f: "2026-07-03" },
+    { e: "FEXI21",       u: 17.77,   c: 1.60,  f: "2026-07-03" },
+    { e: "FSHOP13",      u: 12.00,   c: 1.52,  f: "2026-07-03" },
+    { e: "CUERVO*",      u: 14.63,   c: 1.52,  f: "2026-07-03" },
+    { e: "LASITE*",      u: 5.06,    c: 1.20,  f: "2026-07-03" },
+    { e: "IVVPESOISHRS", u: 152.90,  c: 1.16,  f: "2026-07-03" },
+    { e: "GMEXICOB",     u: 199.35,  c: 1.00,  f: "2026-07-03" },
+    { e: "FIBRAPL14",    u: 76.39,   c: 0.98,  f: "2026-07-03" },
+  ],
+  BAJAN: [
+    { e: "FIBRAHD15",  u: 2.19,   c: -3.10, f: "2026-07-03" },
+    { e: "NUTRISAA",   u: 3.71,   c: -2.62, f: "2026-07-03" },
+    { e: "SORIANAB",   u: 29.91,  c: -2.57, f: "2026-07-03" },
+    { e: "ASURB",      u: 531.03, c: -2.02, f: "2026-07-03" },
+    { e: "FUNO11",     u: 29.77,  c: -1.45, f: "2026-07-03" },
+    { e: "CMOCTEZ*",   u: 84.00,  c: -1.18, f: "2026-07-03" },
+    { e: "SPORTS",     u: 8.15,   c: -1.09, f: "2026-07-03" },
+    { e: "ACTINVRB",   u: 21.50,  c: -1.06, f: "2026-07-03" },
+    { e: "AUTLANB",    u: 7.60,   c: -1.04, f: "2026-07-03" },
+    { e: "SIGMAFA",    u: 16.07,  c: -0.98, f: "2026-07-03" },
+  ],
+  VOLUMEN: [
+    { e: "GFNORTEO",  u: 187.63, i: 632343088.59 },
+    { e: "GMEXICOB",  u: 199.35, i: 237794762.74 },
+    { e: "FEMSAUBD",  u: 225.49, i: 206282049.71 },
+    { e: "GAPB",      u: 438.10, i: 123146913.26 },
+    { e: "WALMEX*",   u: 50.18,  i: 103063153.30 },
+    { e: "AMXB",      u: 22.48,  i: 101797122.90 },
+    { e: "CEMEXCPO",  u: 21.44,  i: 94231577.32  },
+    { e: "PENOLES*",  u: 772.99, i: 85433614.90  },
+    { e: "PINFRA*",   u: 282.00, i: 63673992.31  },
+    { e: "ORBIA*",    u: 23.00,  i: 59184167.50  },
+  ],
+};
 
-export const MOCK_LOSERS: TopEntry[] = [
-  { ticker: "PINFRA *", name: "Promotora y Operadora de Infraestructura", price: 168.90, change: -9.42, changePct: -5.28, volume: 2340000 },
-  { ticker: "GENTERA O", name: "Gentera", price: 18.74, change: -0.94, changePct: -4.77, volume: 7120000 },
-  { ticker: "RA", name: "Regional", price: 104.30, change: -4.91, changePct: -4.50, volume: 1890000 },
-  { ticker: "GICSA B", name: "GICSA", price: 4.38, change: -0.18, changePct: -3.95, volume: 3450000 },
-  { ticker: "VESTA *", name: "Corporación Inmobiliaria Vesta", price: 52.16, change: -2.02, changePct: -3.73, volume: 4230000 },
-  { ticker: "AUTLAN B", name: "Compañía Minera Autlán", price: 31.50, change: -1.10, changePct: -3.37, volume: 2010000 },
-  { ticker: "CUERVO *", name: "Becle", price: 23.78, change: -0.72, changePct: -2.94, volume: 5670000 },
-  { ticker: "BOLSAA", name: "Bolsa Mexicana de Valores", price: 44.20, change: -1.24, changePct: -2.73, volume: 1340000 },
-];
+export const MOCK_INDICES: IndicesResponse = {
+  IPC:      { e: "Indice de Precios Y Cotizaciones",  u: 67416.22,    a: 66486.49,   x: 67488.76,   n: 66439.73,  c:  1.72,  m:  1138.21,   v: 185721795,   ytdp:  17.4785, f: "2026-06-26 04:59:00" },
+  FTSEBIVA: { e: "Indice FTSE BIVA",                  u: 1352.23,     a: 0,          x: 0,          n: 0,         c:  0.00,  m:  0,          v: 0,           ytdp:  14.3052, f: "2026-06-26 05:00:00" },
+  DJIA:     { e: "Dow Jones Industrial Average",      u: 51920.62,    a: 52009.02,   x: 52655.66,   n: 51857.78,  c:  0.14,  m:  71.72,      v: 639230227,   ytdp:  37.7570, f: "2026-06-26 04:59:00" },
+  SP500:    { e: "Standard and Poor's 500",           u: 7357.49,     a: 7404.91,    x: 7419.08,    n: 7323.50,   c: -0.01,  m: -0.73,       v: 3563880082,  ytdp:  54.2451, f: "2026-06-26 04:59:00" },
+  NASDAQ:   { e: "Nasdaq Composite Index",            u: 25358.60,    a: 25724.78,   x: 25724.78,   n: 25123.43,  c: -0.46,  m: -118.03,     v: 1715495945,  ytdp:  68.9334, f: "2026-06-26 04:59:00" },
+  FTSE100:  { e: "FTSE 100 Index",                    u: 10464.45,    a: 10530.18,   x: 10530.18,   n: 10447.70,  c: -0.62,  m: -65.44,      v: 97775691,    ytdp:  35.3220, f: "2026-06-26 04:59:00" },
+  DAX:      { e: "DAX 40 Index",                      u: 24707.63,    a: 24848.51,   x: 24869.63,   n: 24681.93,  c: -1.15,  m: -287.20,     v: 15076374,    ytdp:  47.4906, f: "2026-06-26 04:59:00" },
+  CAC40:    { e: "CAC 40 Index",                      u: 8387.98,     a: 8410.36,    x: 8421.10,    n: 8379.88,   c: -0.52,  m: -43.63,      v: 9942675,     ytdp:  11.2022, f: "2026-06-26 04:59:00" },
+  NK225:    { e: "Nikkei 225 Index",                  u: 69360.88,    a: 71587.71,   x: 71786.28,   n: 68639.84,  c: -4.15,  m: -3005.46,    v: 1569063800,  ytdp: 107.2701, f: "2026-06-26 04:59:00" },
+  HSI:      { e: "Hang Seng 64 Index",                u: 22671.86,    a: 22952.09,   x: 22962.46,   n: 22518.00,  c: -1.76,  m: -405.05,     v: 4194503173,  ytdp:  32.9962, f: "2026-06-26 04:59:00" },
+  SSE:      { e: "SSE Shanghai Composite Index",      u: 4027.26,     a: 4098.69,    x: 4099.78,    n: 4007.86,   c: -2.26,  m: -93.02,      v: 66010866600, ytdp:  35.3701, f: "2026-06-26 04:59:00" },
+  VIX:      { e: "Cboe Volatility Index",             u: 20.08,       a: 19.70,      x: 20.32,      n: 19.52,     c:  7.78,  m:  1.45,       v: 0,           ytdp:  61.2851, f: "2026-06-26 04:59:00" },
+};
 
-export const MOCK_VOLUME: TopEntry[] = [
-  { ticker: "AMXL", name: "América Móvil", price: 14.84, change: 0.22, changePct: 1.50, volume: 48200000 },
-  { ticker: "CEMEXCPO", name: "CEMEX", price: 7.62, change: -0.14, changePct: -1.80, volume: 42700000 },
-  { ticker: "GFNORTEO", name: "Grupo Financiero Banorte", price: 146.30, change: 2.80, changePct: 1.95, volume: 38900000 },
-  { ticker: "WALMEX V", name: "Walmart de México", price: 67.24, change: 2.31, changePct: 3.56, volume: 31400000 },
-  { ticker: "BIMBOA", name: "Grupo Bimbo", price: 89.35, change: 3.75, changePct: 4.38, volume: 28600000 },
-  { ticker: "KOFUBL", name: "Coca-Cola FEMSA", price: 198.70, change: -1.20, changePct: -0.60, volume: 24100000 },
-  { ticker: "TLEVISACPO", name: "Televisa", price: 28.46, change: 0.48, changePct: 1.72, volume: 21800000 },
-  { ticker: "GMEXICOB", name: "Grupo México", price: 108.90, change: -2.30, changePct: -2.07, volume: 19500000 },
-];
+export const MOCK_TASAS: TasasResponse = {
+  TIIE182:       { t: 6.8474, f: "2026-07-06" },
+  TIIEFB:        { t: 6.4900, f: "2026-07-03" },
+  TIIE28:        { t: 6.7559, f: "2026-07-06" },
+  TIIE91:        { t: 6.7931, f: "2026-07-06" },
+  CETE28:        { t: 6.3000, f: "2026-07-02" },
+  "CETE 91":     { t: 6.4900, f: "2026-07-02" },
+  CETE182:       { t: 6.7500, f: "2026-07-02" },
+  CETE364:       { t: 7.1200, f: "2026-06-25" },
+  Tasa_Objetivo: { t: 6.5000, f: "2026-07-04" },
+};
 
-export const MOCK_INDICES: IndexEntry[] = [
-  { name: "S&P/BMV IPC", ticker: "IPC", value: 52483.60, change: 312.40, changePct: 0.60, region: "MX" },
-  { name: "S&P 500", ticker: "SPX", value: 5487.03, change: -18.62, changePct: -0.34, region: "US" },
-  { name: "Nasdaq Comp.", ticker: "IXIC", value: 17421.35, change: -82.10, changePct: -0.47, region: "US" },
-  { name: "Dow Jones", ticker: "DJIA", value: 38905.20, change: 134.80, changePct: 0.35, region: "US" },
-  { name: "FTSE 100", ticker: "UKX", value: 8184.50, change: 42.30, changePct: 0.52, region: "UK" },
-  { name: "DAX", ticker: "DAX", value: 18391.75, change: -67.40, changePct: -0.37, region: "DE" },
-  { name: "Nikkei 225", ticker: "NKY", value: 38647.00, change: -189.50, changePct: -0.49, region: "JP" },
-  { name: "Shanghai Comp.", ticker: "SHCOMP", value: 3088.43, change: 22.15, changePct: 0.72, region: "CN" },
-];
+export const MOCK_DIVISAS: DivisasResponse = {
+  AUDUSD: { u: 0.6903,  c: -0.10, m: -0.0007 },
+  CADMXN: { u: 12.3493, c:  0.16, m:  0.0196 },
+  CHFMXN: { u: 21.6778, c:  0.30, m:  0.0659 },
+  EURMXN: { u: 19.9913, c:  0.42, m:  0.0833 },
+  EURUSD: { u: 1.1408,  c:  0.34, m:  0.0039 },
+  GBPMXN: { u: 23.1671, c:  0.29, m:  0.0671 },
+  GBPUSD: { u: 1.3224,  c:  0.24, m:  0.0031 },
+  USDCAD: { u: 1.4181,  c: -0.14, m: -0.0020 },
+  USDJPY: { u: 161.55,  c: -0.15, m: -0.2400 },
+  USDMXN: { u: 17.5147, c:  0.03, m:  0.0047 },
+  t: "2026-06-26 04:01:00",
+};
 
-export const MOCK_TASAS: TasaEntry[] = [
-  { name: "CETES 28d", plazo: "28 días", rate: 10.48, prev: 10.50 },
-  { name: "CETES 91d", plazo: "91 días", rate: 10.42, prev: 10.45 },
-  { name: "CETES 182d", plazo: "182 días", rate: 10.28, prev: 10.32 },
-  { name: "CETES 364d", plazo: "364 días", rate: 10.05, prev: 10.10 },
-  { name: "TIIE 28d", plazo: "28 días", rate: 10.75, prev: 10.75 },
-  { name: "Obj. Banxico", plazo: "Tasa Objetivo", rate: 10.50, prev: 10.75 },
-];
-
-export const MOCK_DIVISAS: DivisaEntry[] = [
-  { pair: "USD/MXN", name: "Dólar Estadounidense", value: 17.2840, change: 0.0342, changePct: 0.20 },
-  { pair: "EUR/MXN", name: "Euro", value: 18.7420, change: -0.0810, changePct: -0.43 },
-  { pair: "GBP/MXN", name: "Libra Esterlina", value: 21.9350, change: 0.1240, changePct: 0.57 },
-  { pair: "JPY/MXN", name: "Yen Japonés", value: 0.1138, change: -0.0012, changePct: -1.04 },
-  { pair: "CAD/MXN", name: "Dólar Canadiense", value: 12.6810, change: 0.0570, changePct: 0.45 },
-  { pair: "CHF/MXN", name: "Franco Suizo", value: 19.4230, change: -0.2100, changePct: -1.07 },
-];
-
-export const MOCK_COMMODITIES: CommodityEntry[] = [
-  { name: "WTI Crude", ticker: "CL", price: 78.42, unit: "USD/bbl", change: -1.24, changePct: -1.55 },
-  { name: "Brent Crude", ticker: "CO", price: 82.18, unit: "USD/bbl", change: -1.08, changePct: -1.30 },
-  { name: "Oro / Gold", ticker: "GC", price: 2318.60, unit: "USD/oz", change: 12.40, changePct: 0.54 },
-  { name: "Plata / Silver", ticker: "SI", price: 29.48, unit: "USD/oz", change: 0.34, changePct: 1.17 },
-  { name: "Cobre / Copper", ticker: "HG", price: 4.5820, unit: "USD/lb", change: -0.0420, changePct: -0.91 },
-  { name: "Gas Natural", ticker: "NG", price: 2.748, unit: "USD/MMBtu", change: 0.0320, changePct: 1.18 },
-];
+export const MOCK_COMMODITIES: CommoditiesResponse = {
+  petroleo_wti:   { u: 68.345,  x: "USD por barril",       m:  0.419, p: -0.61, ytd:  19.03, yoy:   0.61, t: "2024-07-05", l: -25.14, s:  -3.40 },
+  petroleo_brent: { u: 71.691,  x: "USD por barril",       m:  0.411, p: -0.57, ytd:  17.82, yoy:   3.03, t: "2024-07-05", l: -23.94, s:  -3.00 },
+  gas_natural:    { u: 3.2098,  x: "USD por MMBTU",        m:  0.034, p: -1.05, ytd: -12.92, yoy:  -5.93, t: "2024-07-05", l:   2.00, s:   0.91 },
+  oro:            { u: 3309.95, x: "USD por Onza Troy",    m: 42.870, p: -1.28, ytd:  26.12, yoy:  44.35, t: "2024-06-06", l:  -1.96, s:   0.63 },
+  plata:          { u: 29.48,   x: "USD por Onza Troy",    m:  0.340, p:  1.17, ytd:  18.40, yoy:  22.10, t: "2024-07-05", l:   1.20, s:   1.17 },
+  cobre:          { u: 4.5820,  x: "USD por libra",        m: -0.042, p: -0.91, ytd:  14.20, yoy:  18.50, t: "2024-07-05", l:  -2.30, s:  -0.91 },
+  maiz:           { u: 425.00,  x: "USD por bushel",       m:  4.000, p:  0.95, ytd:  -3.46, yoy:   1.67, t: "2024-07-05", l:   1.49, s:   5.72 },
+  trigo:          { u: 590.50,  x: "USD por bushel",       m:  1.500, p: -0.25, ytd:  16.47, yoy:   7.66, t: "2024-07-05", l:   1.24, s:   3.69 },
+  soja:           { u: 1131.75, x: "USD por bushel",       m:  5.500, p:  0.49, ytd:   9.83, yoy:   7.27, t: "2024-07-02", l:  -1.93, s:   0.38 },
+  cacao:          { u: 5017.24, x: "USD por tonelada",     m: 18.760, p: -0.37, ytd: -17.28, yoy: -38.81, t: "2024-07-03", l:  26.54, s:  -1.53 },
+  cafe:           { u: 302.16,  x: "USD por libra",        m:  0.960, p:  0.32, ytd: -13.36, yoy:   8.42, t: "2024-07-03", l:  22.26, s:  10.60 },
+  azucar:         { u: 14.81,   x: "USD por libra",        m:  0.040, p: -0.27, ytd:  -1.33, yoy:  -8.82, t: "2024-07-05", l:   4.89, s:   0.21 },
+  uranio:         { u: 85.70,   x: "USD por libra",        m:  0.350, p: -0.41, ytd:   4.96, yoy:  10.72, t: "2024-07-02", l:  -0.46, s:   0.23 },
+  gasolina:       { u: 2.9339,  x: "USD por galón",        m:  0.017, p: -0.58, ytd:  71.48, yoy:  36.41, t: "2024-07-05", l:  -4.45, s:   1.13 },
+  carbon:         { u: 128.80,  x: "USD por tonelada",     m:  0.300, p: -0.23, ytd:  19.81, yoy:  17.14, t: "2024-07-03", l: -12.71, s:   2.22 },
+};

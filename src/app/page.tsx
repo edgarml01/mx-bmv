@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect, useCallback } from "react";
 import { TrendingUp, TrendingDown, BarChart3, RefreshCw, Activity } from "lucide-react";
-import { TopResponse, TopSubenBajan, TopVolumen, IndicesResponse, DivisasResponse, DivisaData, TasasResponse , CommodityData,CommoditiesResponse} from "./_components/types";
+import { TopResponse, TopSubenBajan, TopVolumen, IndicesResponse, DivisasResponse, DivisaData, TasasResponse , CommodityData,CommoditiesResponse} from "./dashboard/_components/types";
 import { MOCK_TOP, MOCK_INDICES, MOCK_TASAS, MOCK_DIVISAS, MOCK_COMMODITIES } from "./dashboard/_components/mock-data";
 import {fmt, fmtVol, pctColor, pctBg, PctBadge, now, SectionLabel} from "./dashboard/_components/helpers";
 

@@ -1,17 +1,22 @@
 'use client'
 import { useState, useEffect, useCallback } from "react";
 import { TrendingUp, TrendingDown, BarChart3, RefreshCw, Activity } from "lucide-react";
-import { TopResponse, TopSubenBajan, TopVolumen, IndicesResponse, DivisasResponse, DivisaData, TasasResponse , CommodityData,CommoditiesResponse} from "./dashboard/_components/types";
+import { TopResponse, TopSubenBajan, TopVolumen, IndicesResponse, DivisasResponse, DivisaData, TasasResponse , CommodityData, CommoditiesResponse } from "./dashboard/_components/types";
 import { MOCK_TOP, MOCK_INDICES, MOCK_TASAS, MOCK_DIVISAS, MOCK_COMMODITIES } from "./dashboard/_components/mock-data";
-import {fmt, fmtVol, pctColor, pctBg, PctBadge, now, SectionLabel} from "./dashboard/_components/helpers";
+import { fmt, fmtVol, pctColor, pctBg, PctBadge, now, SectionLabel } from "./dashboard/_components/helpers";
 
 
 // ── Ticker Tape ────────────────────────────────────────────────────────────
-function TickerTape() {
+interface TickerTapeProps {
+  top: TopResponse;
+  indices: IndicesResponse;
+}
+
+function TickerTape({ top, indices }: TickerTapeProps) {
   const items = [
-    ...MOCK_TOP.SUBEN.slice(0, 4).map((d) => ({ label: d.e, value: `$${fmt(d.u)}`, pct: d.c })),
-    ...MOCK_TOP.BAJAN.slice(0, 4).map((d) => ({ label: d.e, value: `$${fmt(d.u)}`, pct: d.c })),
-    ...Object.entries(MOCK_INDICES).slice(0, 4).map(([k, d]) => ({ label: k, value: fmt(d.u), pct: d.c })),
+    ...(top?.SUBEN || []).slice(0, 4).map((d) => ({ label: d.e, value: `$${fmt(d.u)}`, pct: d.c })),
+    ...(top?.BAJAN || []).slice(0, 4).map((d) => ({ label: d.e, value: `$${fmt(d.u)}`, pct: d.c })),
+    ...Object.entries(indices || {}).slice(0, 4).map(([k, d]) => ({ label: k, value: fmt(d.u), pct: d.c })),
   ];
 
   return (
@@ -35,7 +40,11 @@ function TickerTape() {
 // ── Termómetro ─────────────────────────────────────────────────────────────
 type TopTab = "SUBEN" | "BAJAN" | "VOLUMEN";
 
-function Termometro() {
+interface TermometroProps {
+  top: TopResponse;
+}
+
+function Termometro({ top }: TermometroProps) {
   const [tab, setTab] = useState<TopTab>("SUBEN");
 
   const tabs: { id: TopTab; label: string; icon: React.ReactNode; color: string }[] = [
@@ -50,7 +59,7 @@ function Termometro() {
     blue:    "bg-blue-400/10 text-blue-400 border-b-2 border-blue-400",
   };
 
-  const rows = MOCK_TOP[tab];
+  const rows = top?.[tab] || [];
 
   return (
     <div className="flex flex-col bg-card border border-border rounded-lg overflow-hidden h-full">
@@ -106,12 +115,16 @@ function Termometro() {
 }
 
 // ── Indices ────────────────────────────────────────────────────────────────
-function IndicesGrid() {
+interface IndicesGridProps {
+  indices: IndicesResponse;
+}
+
+function IndicesGrid({ indices }: IndicesGridProps) {
   return (
     <div className="flex flex-col gap-3">
       <SectionLabel>Índices de Referencia</SectionLabel>
       <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-2">
-        {Object.entries(MOCK_INDICES).map(([key, idx]) => (
+        {Object.entries(indices || {}).map(([key, idx]) => (
           <div key={key} className="bg-card border border-border rounded-lg p-3 hover:bg-accent/20 transition-colors">
             <div className="flex items-start justify-between mb-1.5">
               <div className="min-w-0 mr-2">
@@ -155,12 +168,16 @@ const TASA_LABELS: Record<string, string> = {
   Tasa_Objetivo: "Obj. Banxico",
 };
 
-function TasasRow() {
+interface TasasRowProps {
+  tasas: TasasResponse;
+}
+
+function TasasRow({ tasas }: TasasRowProps) {
   return (
     <div className="flex flex-col gap-3">
       <SectionLabel>Tasas de Interés · Mercado de Dinero MX</SectionLabel>
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-9 gap-2">
-        {Object.entries(MOCK_TASAS).map(([key, d]) => (
+        {Object.entries(tasas || {}).map(([key, d]) => (
           <div key={key} className="bg-card border border-border rounded-lg p-3 hover:bg-accent/20 transition-colors">
             <div className="text-[10px] font-mono text-muted-foreground mb-1 truncate">{TASA_LABELS[key] ?? key}</div>
             <div className="font-mono font-bold text-lg text-amber-400 tabular-nums">{fmt(d.t, 4)}%</div>
@@ -173,8 +190,12 @@ function TasasRow() {
 }
 
 // ── Divisas ────────────────────────────────────────────────────────────────
-function DivisasPanel() {
-  const pairs = Object.entries(MOCK_DIVISAS).filter(
+interface DivisasPanelProps {
+  divisas: DivisasResponse;
+}
+
+function DivisasPanel({ divisas }: DivisasPanelProps) {
+  const pairs = Object.entries(divisas || {}).filter(
     ([, v]) => typeof v === "object"
   ) as [string, DivisaData][];
 
@@ -214,52 +235,98 @@ function DivisasPanel() {
 }
 
 // ── Commodities ────────────────────────────────────────────────────────────
-function CommoditiesPanel() {
-  const items = Object.entries(MOCK_COMMODITIES).filter(
+interface CommoditiesPanelProps {
+  commodities: CommoditiesResponse;
+}
+
+function CommoditiesPanel({ commodities }: CommoditiesPanelProps) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  const items = Object.entries(commodities || {}).filter(
     ([, v]) => typeof v === "object"
   ) as [string, CommodityData][];
+
+  const totalItems = items.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedItems = items.slice(startIndex, startIndex + itemsPerPage);
 
   function label(key: string) {
     return key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
   }
 
+  // Reset page to 1 if commodities data updates
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [commodities]);
+
   return (
     <div className="flex flex-col gap-3">
       <SectionLabel>Materias Primas · Commodities</SectionLabel>
-      <div className="bg-card border border-border rounded-lg overflow-hidden">
-        <table className="w-full text-xs">
-          <thead>
-            <tr className="border-b border-border bg-secondary/40">
-              <th className="text-left px-3 py-2 text-muted-foreground font-mono font-medium">Producto</th>
-              <th className="text-right px-3 py-2 text-muted-foreground font-mono font-medium">Precio</th>
-              <th className="text-right px-3 py-2 text-muted-foreground font-mono font-medium hidden sm:table-cell">Unidad</th>
-              <th className="text-right px-3 py-2 text-muted-foreground font-mono font-medium">Var %</th>
-              <th className="text-right px-3 py-2 text-muted-foreground font-mono font-medium hidden md:table-cell">YTD</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map(([key, c]) => (
-              <tr key={key} className="border-b border-border/40 hover:bg-accent/30 transition-colors">
-                <td className="px-3 py-2.5">
-                  <div className="font-mono font-semibold text-foreground">{label(key)}</div>
-                  <div className="text-[10px] text-muted-foreground">{c.t}</div>
-                </td>
-                <td className="px-3 py-2.5 text-right font-mono font-semibold text-foreground tabular-nums">
-                  {fmt(c.u, c.u < 10 ? 4 : 2)}
-                </td>
-                <td className="px-3 py-2.5 text-right font-mono text-muted-foreground text-[10px] hidden sm:table-cell">
-                  {c.x}
-                </td>
-                <td className="px-3 py-2.5 text-right">
-                  <PctBadge value={c.p} />
-                </td>
-                <td className={`px-3 py-2.5 text-right font-mono text-[11px] hidden md:table-cell ${pctColor(c.ytd)}`}>
-                  {c.ytd > 0 ? "+" : ""}{Math.abs(c.ytd).toFixed(2)}%
-                </td>
+      <div className="bg-card border border-border rounded-lg overflow-hidden flex flex-col justify-between h-full">
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="border-b border-border bg-secondary/40">
+                <th className="text-left px-3 py-2 text-muted-foreground font-mono font-medium">Producto</th>
+                <th className="text-right px-3 py-2 text-muted-foreground font-mono font-medium">Precio</th>
+                <th className="text-right px-3 py-2 text-muted-foreground font-mono font-medium hidden sm:table-cell">Unidad</th>
+                <th className="text-right px-3 py-2 text-muted-foreground font-mono font-medium">Var %</th>
+                <th className="text-right px-3 py-2 text-muted-foreground font-mono font-medium hidden md:table-cell">YTD</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {paginatedItems.map(([key, c]) => (
+                <tr key={key} className="border-b border-border/40 hover:bg-accent/30 transition-colors">
+                  <td className="px-3 py-2.5">
+                    <div className="font-mono font-semibold text-foreground">{label(key)}</div>
+                    <div className="text-[10px] text-muted-foreground">{c.t}</div>
+                  </td>
+                  <td className="px-3 py-2.5 text-right font-mono font-semibold text-foreground tabular-nums">
+                    {fmt(c.u, c.u < 10 ? 4 : 2)}
+                  </td>
+                  <td className="px-3 py-2.5 text-right font-mono text-muted-foreground text-[10px] hidden sm:table-cell">
+                    {c.x}
+                  </td>
+                  <td className="px-3 py-2.5 text-right">
+                    <PctBadge value={c.p} />
+                  </td>
+                  <td className={`px-3 py-2.5 text-right font-mono text-[11px] hidden md:table-cell ${pctColor(c.ytd)}`}>
+                    {c.ytd > 0 ? "+" : ""}{Math.abs(c.ytd).toFixed(2)}%
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Sleek Pagination Footer */}
+        <div className="flex items-center justify-between px-4 py-2.5 bg-secondary/20 border-t border-border text-xs mt-auto">
+          <span className="text-muted-foreground font-mono text-[10px]">
+            Mostrando {Math.min(startIndex + 1, totalItems)}-{Math.min(startIndex + itemsPerPage, totalItems)} de {totalItems}
+          </span>
+          <div className="flex items-center gap-2 font-mono">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="px-2 py-1 rounded border border-border text-[10px] hover:bg-accent text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+            >
+              Anterior
+            </button>
+            <span className="text-foreground font-semibold px-1 text-[10px]">
+              {currentPage} / {totalPages || 1}
+            </span>
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages || totalPages === 0}
+              className="px-2 py-1 rounded border border-border text-[10px] hover:bg-accent text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+            >
+              Siguiente
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -281,15 +348,49 @@ export default function App() {
   const [lastUpdate, setLastUpdate] = useState(now);
   const status = getMarketStatus();
 
+  // State initialized with mock data to prevent initial empty rendering/layout shifts
+  const [top, setTop] = useState<TopResponse>(MOCK_TOP);
+  const [indices, setIndices] = useState<IndicesResponse>(MOCK_INDICES);
+  const [tasas, setTasas] = useState<TasasResponse>(MOCK_TASAS);
+  const [divisas, setDivisas] = useState<DivisasResponse>(MOCK_DIVISAS);
+  const [commodities, setCommodities] = useState<CommoditiesResponse>(MOCK_COMMODITIES);
+
+  const fetchAllData = useCallback(async () => {
+    try {
+      const [topRes, indicesRes, tasasRes, divisasRes, commoditiesRes] = await Promise.all([
+        fetch("/api/databursatil/top").then((r) => r.json()),
+        fetch("/api/databursatil/indices").then((r) => r.json()),
+        fetch("/api/databursatil/tasas").then((r) => r.json()),
+        fetch("/api/databursatil/divisas").then((r) => r.json()),
+        fetch("/api/databursatil/commodities").then((r) => r.json()),
+      ]);
+
+      if (topRes) setTop(topRes);
+      if (indicesRes) setIndices(indicesRes);
+      if (tasasRes) setTasas(tasasRes);
+      if (divisasRes) setDivisas(divisasRes);
+      if (commoditiesRes) setCommodities(commoditiesRes);
+      
+      setLastUpdate(now());
+    } catch (error) {
+      console.error("Error fetching live data from internal endpoints:", error);
+    }
+  }, []);
+
   useEffect(() => {
     const t = setInterval(() => setTime(now()), 1000);
     return () => clearInterval(t);
   }, []);
 
-  const handleRefresh = useCallback(() => {
+  useEffect(() => {
+    fetchAllData();
+  }, [fetchAllData]);
+
+  const handleRefresh = useCallback(async () => {
     setRefreshing(true);
-    setTimeout(() => { setRefreshing(false); setLastUpdate(now()); }, 1200);
-  }, []);
+    await fetchAllData();
+    setRefreshing(false);
+  }, [fetchAllData]);
 
   useEffect(() => {
     const t = setInterval(handleRefresh, 60_000);
@@ -341,7 +442,7 @@ export default function App() {
         </div>
       </header>
 
-      <TickerTape />
+      <TickerTape top={top} indices={indices} />
 
       <main className="max-w-screen-2xl mx-auto px-4 py-5 space-y-6">
         {/* Row 1: Termómetro + Indices */}
@@ -349,19 +450,19 @@ export default function App() {
           <div className="flex flex-col gap-3">
             <SectionLabel>Termómetro del Día · /v2/top</SectionLabel>
             <div style={{ height: 440 }}>
-              <Termometro />
+              <Termometro top={top} />
             </div>
           </div>
-          <IndicesGrid />
+          <IndicesGrid indices={indices} />
         </div>
 
         {/* Row 2: Tasas */}
-        <TasasRow />
+        <TasasRow tasas={tasas} />
 
         {/* Row 3: Divisas + Commodities */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          <DivisasPanel />
-          <CommoditiesPanel />
+          <DivisasPanel divisas={divisas} />
+          <CommoditiesPanel commodities={commodities} />
         </div>
 
         <footer className="border-t border-border pt-4 flex flex-wrap items-center justify-between gap-2 text-[10px] font-mono text-muted-foreground">
